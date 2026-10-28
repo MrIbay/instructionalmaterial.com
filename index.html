@@ -695,11 +695,12 @@
                 const card = document.createElement('div');
                 card.id = `item-${item.id}`;
                 card.draggable = true;
-                card.className = `item-card w-16 h-16 bg-slate-900 border-2 border-slate-700 hover:border-blue-400 rounded-2xl cursor-grab flex items-center justify-center p-1 transition btn-bounce shadow-md ${selectedTouchItemId === item.id ? 'selected-touch' : ''}`;
+                // Made the image boxes significantly larger (w-24 h-24 to w-28 h-28 on larger screens) for high visibility
+                card.className = `item-card w-24 h-24 md:w-28 md:h-28 bg-slate-900 border-2 border-slate-700 hover:border-blue-400 rounded-2xl cursor-grab flex items-center justify-center p-1.5 transition btn-bounce shadow-lg ${selectedTouchItemId === item.id ? 'selected-touch' : ''}`;
                 
                 card.innerHTML = `
-                    <div class="w-full h-full rounded-xl overflow-hidden bg-slate-800 flex items-center justify-center">
-                        <img src="${item.img}" alt="${item.name}" class="w-full h-full object-cover">
+                    <div class="w-full h-full rounded-xl overflow-hidden bg-slate-800/80 flex items-center justify-center p-1">
+                        <img src="${item.img}" alt="${item.name}" class="w-full h-full object-contain filter drop-shadow">
                     </div>
                 `;
 
@@ -768,9 +769,10 @@
 
                 const targetZoneBox = document.querySelector(`[data-category="${targetCategory}"] .drop-contents`);
                 const badge = document.createElement('div');
-                badge.className = 'w-12 h-12 bg-slate-800 border border-slate-700 rounded-xl overflow-hidden flex items-center justify-center shadow-sm';
+                // Enlarge placed item badges inside categories for better visibility
+                badge.className = 'w-16 h-16 md:w-20 md:h-20 bg-slate-800 border-2 border-slate-700 rounded-xl overflow-hidden flex items-center justify-center p-1 shadow-md';
                 badge.innerHTML = `
-                    <img src="${item.img}" alt="${item.name}" class="w-full h-full object-cover">
+                    <img src="${item.img}" alt="${item.name}" class="w-full h-full object-contain filter drop-shadow">
                 `;
                 targetZoneBox.appendChild(badge);
 
