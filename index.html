@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PC Builder Challenge - Grade 7 Computer Hardware</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti for winning celebrations -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'game-blue': '#1e3a8a',
+                        'game-accent': '#3b82f6',
+                        'game-yellow': '#fbbf24',
+                        'game-green': '#10b981',
+                        'game-purple': '#8b5cf6',
+                        'game-orange': '#f97316'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .btn-bounce {
+            transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-bounce:hover {
+            transform: translateY(-2px) scale(1.02);
+        }
+        .btn-bounce:active {
+            transform: scale(0.95) translateY(2px);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3) !important;
+        }
+
+        /* Pulsing & Floating Animations */
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(251, 191, 36, 0.6), 0 0 40px rgba(245, 158, 11, 0.3);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 35px rgba(251, 191, 36, 0.9), 0 0 60px rgba(245, 158, 11, 0.5);
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes float-slow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(1deg); }
+        }
+
+        @keyframes float-badge {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-4px); }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        @keyframes pointer-bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(6px); }
+        }
+
+        .btn-start-pulse {
+            animation: pulse-glow 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+        }
+
+        .hero-float {
+            animation: float-slow 4s ease-in-out infinite;
+        }
+
+        .badge-float {
+            animation: float-badge 2.5s ease-in-out infinite;
+        }
+
+        .pointer-anim {
+            animation: pointer-bounce 1s ease-in-out infinite;
+        }
+
+        .drop-zone {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .drop-zone.drag-over {
+            background-color: rgba(59, 130, 246, 0.25);
+            border-color: #60a5fa;
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #60a5fa;
+        }
+
+        .item-card {
+            touch-action: none;
+            user-select: none;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .item-card:hover {
+            transform: translateY(-3px) scale(1.05);
+            border-color: #60a5fa;
+            box-shadow: 0 8px 20px -4px rgba(59, 130, 246, 0.4);
+        }
+
+        .selected-touch {
+            outline: 4px solid #fbbf24;
+            transform: scale(1.1) translateY(-2px);
+            box-shadow: 0 0 25px rgba(251, 191, 36, 0.6);
+        }
+
+        /* Animated shimmer gradient for text */
+        .shimmer-text {
+            background: linear-gradient(90deg, #fbbf24 0%, #fef08a 25%, #fbbf24 50%, #fef08a 75%, #fbbf24 100%);
+            background-size: 200% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: shimmer 3s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-800 font-sans min-h-screen flex flex-col justify-between select-none overflow-x-hidden">
+
+    <!-- TOP NAVIGATION BAR -->
+    <header id="app-header" class="hidden bg-slate-800/90 backdrop-blur border-b border-slate-700 text-white px-4 py-3 sticky top-0 z-30 shadow-lg">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <button onclick="goToHome()" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-xl shadow-lg btn-bounce transition">
+                <i class="fa-solid fa-house text-lg"></i>
+                <span class="hidden sm:inline">Home</span>
+            </button>
+
+            <div class="text-center">
+                <h1 id="header-title" class="text-lg md:text-2xl font-black tracking-wide text-yellow-400 drop-shadow">Classification Lab</h1>
+                <p id="header-subtitle" class="text-xs text-slate-300 hidden sm:block">Grade 7 Computer Hardware</p>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <div class="bg-slate-900 border border-slate-700 px-3.5 py-1.5 rounded-xl flex items-center gap-2 shadow-inner">
+                    <i class="fa-solid fa-user text-sky-400 animate-pulse"></i>
+                    <span id="current-player-display" class="font-bold text-sm text-sky-300 max-w-[120px] truncate">Guest</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN VIEW CONTAINER -->
+    <main class="flex-grow flex flex-col justify-center items-center p-3 md:p-6 relative">
+
+        <!-- 1. HOME / MAIN MENU SCREEN -->
+        <section id="screen-home" class="w-full max-w-4xl mx-auto flex flex-col items-center justify-center min-h-[85vh] py-6">
+            <div class="w-full bg-slate-800/90 border-4 border-slate-700 rounded-3xl p-6 md:p-12 shadow-2xl relative overflow-hidden flex flex-col items-center text-center">
+                <!-- Glowing Background Orbs -->
+                <div class="absolute -top-16 -left-16 w-56 h-56 bg-blue-600/30 rounded-full blur-3xl animate-pulse"></div>
+                <div class="absolute -bottom-16 -right-16 w-56 h-56 bg-amber-500/20 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
+
+                <div class="mb-10 relative hero-float">
+                    <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-3xl p-6 md:p-10 shadow-2xl border-2 border-blue-400/40 backdrop-blur">
+                        <div class="flex justify-center mb-4">
+                            <span class="badge-float inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-400 text-slate-900 font-black text-xs uppercase tracking-wider shadow-lg">
+                                <i class="fa-solid fa-graduation-cap text-sm"></i> Grade 7 Computer Science
+                            </span>
+                        </div>
+                        <h1 class="text-4xl md:text-6xl font-black tracking-wider shimmer-text drop-shadow-lg">
+                            PC BUILDER CHALLENGE
+                        </h1>
+                        <p class="text-blue-100 text-base md:text-xl font-medium mt-3 tracking-wide">
+                            Build, Identify, and Learn!
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Animated START Button -->
+                <div class="w-full max-w-sm relative">
+                    <button onclick="goToSpin()" class="btn-start-pulse w-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 text-3xl md:text-4xl font-black py-6 px-10 rounded-2xl shadow-2xl border-b-8 border-yellow-700 btn-bounce flex items-center justify-center gap-4 transition-all duration-300 group cursor-pointer">
+                        <i class="fa-solid fa-play text-slate-950 group-hover:scale-125 transition-transform duration-300"></i> START
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. SPIN THE WHEEL SCREEN -->
+        <section id="screen-spin" class="hidden w-full max-w-5xl mx-auto flex flex-col items-center">
+            <div class="w-full bg-slate-800/90 border-2 border-slate-700 rounded-3xl p-4 md:p-6 shadow-2xl flex flex-col lg:flex-row gap-6 items-center justify-between">
+                
+                <div class="flex flex-col items-center w-full lg:w-1/2">
+                    <div class="relative flex items-center justify-center my-4">
+                        <!-- Animated Pointer -->
+                        <div class="absolute -top-6 z-20 text-red-500 drop-shadow-lg pointer-anim">
+                            <i class="fa-solid fa-caret-down text-6xl"></i>
+                        </div>
+                        
+                        <div class="p-3 bg-slate-700/80 rounded-full border-4 border-amber-400/90 shadow-2xl backdrop-blur relative">
+                            <canvas id="wheel-canvas" width="340" height="340" class="rounded-full max-w-full h-auto cursor-pointer"></canvas>
+                        </div>
+
+                        <button id="wheel-spin-btn" onclick="spinWheel()" class="absolute z-10 w-22 h-22 bg-gradient-to-br from-amber-400 to-yellow-500 hover:scale-110 text-slate-950 font-black rounded-full shadow-2xl border-4 border-white flex flex-col items-center justify-center btn-bounce transition-all duration-300">
+                            <span class="text-base uppercase tracking-wider">SPIN</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="w-full lg:w-1/2 flex flex-col gap-4">
+                    <div id="selection-banner" class="bg-slate-900/90 border-2 border-slate-700 rounded-2xl p-5 text-center flex flex-col items-center justify-center min-h-[170px] shadow-inner">
+                        <span id="winner-tag" class="text-amber-400 font-bold uppercase text-xs tracking-widest mb-1 flex items-center gap-1.5">
+                            <i class="fa-solid fa-arrows-spin text-amber-400"></i> Classroom Randomizer
+                        </span>
+                        <h2 id="winner-name-display" class="text-2xl md:text-3xl font-black text-white mb-3">Spin to select a student!</h2>
+                        <button id="start-activity-btn" onclick="startActivityForSelected()" class="hidden bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-slate-950 text-lg font-black py-3.5 px-8 rounded-xl shadow-xl border-b-4 border-emerald-800 btn-bounce flex items-center gap-2 transition animate-bounce">
+                            <i class="fa-solid fa-circle-play"></i> Proceed to Classification Lab
+                        </button>
+                    </div>
+
+                    <div class="bg-slate-900/80 border border-slate-700 rounded-2xl p-4 shadow-lg">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-sm font-bold text-slate-300 flex items-center gap-2">
+                                <i class="fa-solid fa-users text-blue-400"></i> Customize Class Roster
+                            </h3>
+                            <button onclick="resetDefaultRoster()" class="text-xs text-slate-400 hover:text-yellow-400 underline transition">Reset Defaults</button>
+                        </div>
+                        <p class="text-xs text-slate-400 mb-3">Add student names separated by commas:</p>
+                        <div class="flex gap-2 mb-3">
+                            <input type="text" id="roster-input" class="bg-slate-800 border border-slate-600 text-white text-sm rounded-xl px-3.5 py-2 flex-grow focus:outline-none focus:border-blue-400 transition" placeholder="Marco, Pedro, Ana, Sofia, Luis...">
+                            <button onclick="updateRosterFromInput()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2 rounded-xl btn-bounce transition">
+                                Update
+                            </button>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-1" id="roster-pills">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. ACTIVITY 1: HARDWARE CLASSIFICATION LAB -->
+        <section id="screen-activity1" class="hidden w-full max-w-7xl mx-auto flex flex-col gap-4">
+            <div class="bg-blue-900/70 border border-blue-700/60 rounded-2xl p-3 px-5 flex flex-wrap items-center justify-between gap-3 text-slate-200 shadow-lg backdrop-blur">
+                <div class="flex items-center gap-3">
+                    <div class="bg-blue-500/20 p-2.5 rounded-xl text-blue-400 animate-pulse">
+                        <i class="fa-solid fa-hand-pointer text-xl"></i>
+                    </div>
+                    <p class="text-xs md:text-sm">
+                        <span class="font-bold text-yellow-300">Instructions:</span> Drag or tap hardware pictures from the <span class="text-blue-300 font-bold">LEFT</span> and <span class="text-blue-300 font-bold">RIGHT</span> drawers into the correct <span class="text-yellow-300 font-bold">CENTER</span> category boxes!
+                    </p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="resetActivity1()" class="text-xs bg-slate-700 hover:bg-slate-600 text-white font-bold px-3.5 py-2 rounded-xl btn-bounce transition">
+                        <i class="fa-solid fa-rotate-left"></i> Reset Items
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+                <!-- LEFT SIDE DRAWER (Picture Boxes Only) -->
+                <div class="lg:col-span-3 bg-slate-800/90 border-2 border-slate-700 rounded-3xl p-3.5 shadow-2xl">
+                    <div class="flex items-center justify-between mb-2.5 border-b border-slate-700 pb-2">
+                        <h3 class="font-black text-slate-200 text-xs md:text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-boxes-stacked text-amber-400"></i> Hardware (Left)
+                        </h3>
+                    </div>
+                    <div id="drawer-left" class="grid grid-cols-2 gap-2.5 min-h-[300px] max-h-[500px] overflow-y-auto p-1 justify-items-center">
+                    </div>
+                </div>
+
+                <!-- CENTER CATEGORIES -->
+                <div class="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <div id="zone-input" data-category="Input" class="drop-zone bg-slate-800/80 border-2 border-dashed border-emerald-500/60 rounded-3xl p-3.5 min-h-[220px] flex flex-col justify-between shadow-xl">
+                        <div class="flex items-center justify-between border-b border-emerald-500/30 pb-2 mb-2">
+                            <h4 class="font-black text-emerald-400 flex items-center gap-2 text-sm md:text-base">
+                                <i class="fa-solid fa-keyboard"></i> Input Devices
+                            </h4>
+                            <span class="text-[9px] uppercase font-bold bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30">Enters Data</span>
+                        </div>
+                        <div class="drop-contents grid grid-cols-3 gap-2 flex-grow min-h-[140px] p-1.5 border border-slate-700/60 rounded-2xl bg-slate-900/50 shadow-inner">
+                        </div>
+                    </div>
+
+                    <div id="zone-output" data-category="Output" class="drop-zone bg-slate-800/80 border-2 border-dashed border-sky-500/60 rounded-3xl p-3.5 min-h-[220px] flex flex-col justify-between shadow-xl">
+                        <div class="flex items-center justify-between border-b border-sky-500/30 pb-2 mb-2">
+                            <h4 class="font-black text-sky-400 flex items-center gap-2 text-sm md:text-base">
+                                <i class="fa-solid fa-desktop"></i> Output Devices
+                            </h4>
+                            <span class="text-[9px] uppercase font-bold bg-sky-500/20 text-sky-300 px-2 py-0.5 rounded-full border border-sky-500/30">Displays Data</span>
+                        </div>
+                        <div class="drop-contents grid grid-cols-3 gap-2 flex-grow min-h-[140px] p-1.5 border border-slate-700/60 rounded-2xl bg-slate-900/50 shadow-inner">
+                        </div>
+                    </div>
+
+                    <div id="zone-storage" data-category="Storage" class="drop-zone bg-slate-800/80 border-2 border-dashed border-amber-500/60 rounded-3xl p-3.5 min-h-[220px] flex flex-col justify-between shadow-xl">
+                        <div class="flex items-center justify-between border-b border-amber-500/30 pb-2 mb-2">
+                            <h4 class="font-black text-amber-400 flex items-center gap-2 text-sm md:text-base">
+                                <i class="fa-solid fa-hard-drive"></i> Storage Devices
+                            </h4>
+                            <span class="text-[9px] uppercase font-bold bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/30">Saves Data</span>
+                        </div>
+                        <div class="drop-contents grid grid-cols-3 gap-2 flex-grow min-h-[140px] p-1.5 border border-slate-700/60 rounded-2xl bg-slate-900/50 shadow-inner">
+                        </div>
+                    </div>
+
+                    <div id="zone-processing" data-category="Processing" class="drop-zone bg-slate-800/80 border-2 border-dashed border-purple-500/60 rounded-3xl p-3.5 min-h-[220px] flex flex-col justify-between shadow-xl">
+                        <div class="flex items-center justify-between border-b border-purple-500/30 pb-2 mb-2">
+                            <h4 class="font-black text-purple-400 flex items-center gap-2 text-sm md:text-base">
+                                <i class="fa-solid fa-microchip"></i> Processing Devices
+                            </h4>
+                            <span class="text-[9px] uppercase font-bold bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full border border-purple-500/30">Executes Data</span>
+                        </div>
+                        <div class="drop-contents grid grid-cols-3 gap-2 flex-grow min-h-[140px] p-1.5 border border-slate-700/60 rounded-2xl bg-slate-900/50 shadow-inner">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT SIDE DRAWER (Picture Boxes Only) -->
+                <div class="lg:col-span-3 bg-slate-800/90 border-2 border-slate-700 rounded-3xl p-3.5 shadow-2xl">
+                    <div class="flex items-center justify-between mb-2.5 border-b border-slate-700 pb-2">
+                        <h3 class="font-black text-slate-200 text-xs md:text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-boxes-stacked text-amber-400"></i> Hardware (Right)
+                        </h3>
+                    </div>
+                    <div id="drawer-right" class="grid grid-cols-2 gap-2.5 min-h-[300px] max-h-[500px] overflow-y-auto p-1 justify-items-center">
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FEEDBACK POPUP MODAL WITH AUTOMATIC RETURN TIMER -->
+    <div id="modal-feedback" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-800 border-4 border-slate-700 w-full max-w-md rounded-3xl p-6 shadow-2xl relative text-center flex flex-col items-center">
+            <div id="feedback-icon-container" class="w-20 h-20 rounded-full flex items-center justify-center text-4xl mb-4 border-4 shadow-lg">
+                <i id="feedback-icon" class="fa-solid fa-check"></i>
+            </div>
+            <h3 id="feedback-title" class="text-2xl font-black text-white mb-1">Correct!</h3>
+            <p id="feedback-subtitle" class="text-sm font-semibold text-amber-400 mb-2">This is a Monitor</p>
+
+            <!-- Student Name revealed on Correct Answer -->
+            <div id="feedback-student-banner" class="hidden mb-4 bg-emerald-500/10 border border-emerald-500/40 rounded-xl px-4 py-2 w-full text-emerald-300 font-bold text-xs flex items-center justify-center gap-2">
+                <i class="fa-solid fa-award text-amber-400"></i> Answered by: <span id="feedback-student-name" class="text-white underline">Student Name</span>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-700 rounded-2xl p-4 w-full mb-6 flex flex-col items-center">
+                <div id="feedback-item-img-container" class="mb-3 w-24 h-24 bg-slate-800 rounded-xl overflow-hidden border border-slate-700 flex items-center justify-center">
+                    <img id="feedback-item-img" src="https://placehold.co/200x200/1e293b/38bdf8?text=Hardware" alt="Hardware Image" class="w-full h-full object-cover">
+                </div>
+                <p id="feedback-explanation" class="text-xs md:text-sm text-slate-300 leading-relaxed">
+                    A monitor is an output device that visualizes processed graphical information from the computer.
+                </p>
+            </div>
+
+            <!-- Auto Return Countdown Timer -->
+            <div id="auto-return-container" class="w-full bg-slate-900/60 border border-slate-700 rounded-xl py-2 px-4 mb-4 text-xs text-amber-300 font-bold flex items-center justify-center gap-2">
+                <i class="fa-solid fa-hourglass-half animate-spin text-amber-400"></i>
+                <span id="auto-return-text">Returning to Wheel in 3 seconds...</span>
+            </div>
+
+            <button onclick="manualCloseFeedbackModal()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 px-6 rounded-2xl shadow-lg btn-bounce text-base">
+                Next Student Turn <i class="fa-solid fa-arrow-right ml-1"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-950 text-slate-500 text-xs text-center py-3 border-t border-slate-800">
+        Grade 7 Computer Science Educational Module &bull; PC Builder Challenge
+    </footer>
+
+    <!-- JAVASCRIPT GAME LOGIC -->
+    <script>
+        // HARDWARE ITEMS WITH IMAGE URLS
+        // Note: You can replace the 'img' property string below with your own custom image file paths (e.g. 'images/keyboard.png')
+        const HARDWARE_ITEMS = [
+            { id: 'keyboard', name: 'Keyboard', category: 'Input', img: 'https://placehold.co/200x200/0f172a/34d399?text=Keyboard', desc: 'An input device with keys used to type letters, numbers, and commands into the computer.' },
+            { id: 'mouse', name: 'Mouse', category: 'Input', img: 'https://placehold.co/200x200/0f172a/34d399?text=Mouse', desc: 'A pointing input device that allows users to click and interact with items on screen.' },
+            { id: 'webcam', name: 'Webcam', category: 'Input', img: 'https://placehold.co/200x200/0f172a/34d399?text=Webcam', desc: 'An input device that captures video and live stream images into the system.' },
+            { id: 'microphone', name: 'Microphone', category: 'Input', img: 'https://placehold.co/200x200/0f172a/34d399?text=Microphone', desc: 'An input device that records audio and voice commands into digital data.' },
+            
+            { id: 'monitor', name: 'Monitor', category: 'Output', img: 'https://placehold.co/200x200/0f172a/38bdf8?text=Monitor', desc: 'An output device that displays video graphics and visual data to the user.' },
+            { id: 'printer', name: 'Printer', category: 'Output', img: 'https://placehold.co/200x200/0f172a/38bdf8?text=Printer', desc: 'An output device that produces hard copies of text or image documents on paper.' },
+            { id: 'speaker', name: 'Speaker', category: 'Output', img: 'https://placehold.co/200x200/0f172a/38bdf8?text=Speaker', desc: 'An output device that outputs sound, music, and audio notifications from the computer.' },
+            
+            { id: 'ssd', name: 'SSD Drive', category: 'Storage', img: 'https://placehold.co/200x200/0f172a/fbbf24?text=SSD+Drive', desc: 'A high-speed solid-state storage device used to store operating systems and personal files permanently.' },
+            { id: 'flashdrive', name: 'Flash Drive', category: 'Storage', img: 'https://placehold.co/200x200/0f172a/fbbf24?text=Flash+Drive', desc: 'A portable flash memory storage device for transferring files easily between computers.' },
+            
+            { id: 'cpu', name: 'CPU', category: 'Processing', img: 'https://placehold.co/200x200/0f172a/c084fc?text=CPU', desc: 'The Central Processing Unit (Brain of the computer) that performs calculations and carries out instructions.' },
+            { id: 'ram', name: 'RAM Stick', category: 'Processing', img: 'https://placehold.co/200x200/0f172a/c084fc?text=RAM+Stick', desc: 'Random Access Memory provides high-speed temporary memory for active running apps and tasks.' },
+            { id: 'gpu', name: 'Graphics Card', category: 'Processing', img: 'https://placehold.co/200x200/0f172a/c084fc?text=GPU', desc: 'A dedicated processing component designed to handle heavy 3D rendering and visual calculations.' }
+        ];
+
+        let studentRoster = ['Marco', 'Pedro', 'Ana', 'Luis', 'Sofia', 'Juan', 'Maria'];
+        let currentPlayer = "Guest";
+        let winningIndex = -1; // Keep track of the winner's index
+        let selectedTouchItemId = null;
+        let isSpinning = false;
+        let currentWheelAngle = 0;
+        let currentItems = [];
+        let feedbackTimer = null;
+        let countdownInterval = null;
+
+        // Audio Synthesis Setup
+        let audioCtx;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            initAudio();
+            if (!audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'tick') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.05);
+                } else if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+                    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+                    osc.frequency.setValueAtTime(180, audioCtx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'win') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+                    osc.frequency.setValueAtTime(554.37, audioCtx.currentTime + 0.1);
+                    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.5);
+                }
+            } catch (e) { console.log('Audio error:', e); }
+        }
+
+        // Navigation Functions
+        function showScreen(screenId) {
+            document.getElementById('screen-home').classList.add('hidden');
+            document.getElementById('screen-spin').classList.add('hidden');
+            document.getElementById('screen-activity1').classList.add('hidden');
+
+            const header = document.getElementById('app-header');
+            if (screenId === 'screen-home') {
+                header.classList.add('hidden');
+            } else {
+                header.classList.remove('hidden');
+            }
+
+            document.getElementById(screenId).classList.remove('hidden');
+
+            if (screenId === 'screen-spin') {
+                document.getElementById('header-title').innerText = "Spin the Wheel";
+                document.getElementById('header-subtitle').innerText = "Classroom Student Randomizer";
+                drawWheel();
+            } else if (screenId === 'screen-activity1') {
+                document.getElementById('header-title').innerText = "Classification Lab";
+                document.getElementById('header-subtitle').innerText = "Drag & Drop Activity";
+            }
+        }
+
+        function goToHome() {
+            clearFeedbackTimers();
+            showScreen('screen-home');
+        }
+
+        function goToSpin() {
+            clearFeedbackTimers();
+            showScreen('screen-spin');
+        }
+
+        function startActivityForSelected() {
+            resetActivity1();
+            showScreen('screen-activity1');
+        }
+
+        // Wheel Logic
+        const wheelCanvas = document.getElementById('wheel-canvas');
+        const ctx = wheelCanvas.getContext('2d');
+        const sliceColors = ['#f59e0b', '#3b82f6', '#10b981', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316'];
+
+        function drawWheel() {
+            const numSlices = studentRoster.length;
+            const centerX = wheelCanvas.width / 2;
+            const centerY = wheelCanvas.height / 2;
+            const radius = centerX - 10;
+            const arcSize = (2 * Math.PI) / numSlices;
+
+            ctx.clearRect(0, 0, wheelCanvas.width, wheelCanvas.height);
+
+            if (numSlices === 0) {
+                ctx.fillStyle = '#64748b';
+                ctx.font = 'bold 16px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('All Students Completed!', centerX, centerY);
+                return;
+            }
+
+            for (let i = 0; i < numSlices; i++) {
+                const angle = currentWheelAngle + i * arcSize;
+                
+                ctx.beginPath();
+                ctx.fillStyle = sliceColors[i % sliceColors.length];
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, angle, angle + arcSize);
+                ctx.lineTo(centerX, centerY);
+                ctx.fill();
+                ctx.strokeStyle = '#1e293b';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                ctx.save();
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 15px Inter, sans-serif';
+                ctx.translate(centerX, centerY);
+                ctx.rotate(angle + arcSize / 2);
+                ctx.textAlign = 'right';
+                ctx.fillText(studentRoster[i], radius - 25, 5);
+                ctx.restore();
+            }
+
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 35, 0, 2 * Math.PI);
+            ctx.fillStyle = '#1e293b';
+            ctx.fill();
+            ctx.strokeStyle = '#fbbf24';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+        }
+
+        function renderRosterPills() {
+            const container = document.getElementById('roster-pills');
+            container.innerHTML = '';
+            studentRoster.forEach((name, index) => {
+                const pill = document.createElement('div');
+                pill.className = 'bg-slate-800 border border-slate-700 text-slate-200 px-2.5 py-1 rounded-xl text-xs flex items-center gap-1.5 shadow-sm';
+                pill.innerHTML = `
+                    <span>${name}</span>
+                    <button onclick="removeStudent(${index})" class="text-slate-400 hover:text-red-400 font-bold ml-1">&times;</button>
+                `;
+                container.appendChild(pill);
+            });
+        }
+
+        function updateRosterFromInput() {
+            const input = document.getElementById('roster-input').value.trim();
+            if (!input) return;
+            const names = input.split(',').map(n => n.trim()).filter(n => n.length > 0);
+            if (names.length > 0) {
+                studentRoster = names;
+                document.getElementById('roster-input').value = '';
+                renderRosterPills();
+                drawWheel();
+            }
+        }
+
+        function spinWheel() {
+            if (isSpinning || studentRoster.length === 0) return;
+            isSpinning = true;
+            document.getElementById('wheel-spin-btn').disabled = true;
+            document.getElementById('start-activity-btn').classList.add('hidden');
+            document.getElementById('winner-name-display').innerText = "Spinning...";
+
+            const totalRotations = 5 + Math.random() * 5;
+            const spinAngle = totalRotations * 2 * Math.PI;
+            const duration = 4000;
+            const startTimestamp = performance.now();
+            const initialAngle = currentWheelAngle;
+
+            function animateWheel(timestamp) {
+                const elapsed = timestamp - startTimestamp;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                const easeOut = 1 - Math.pow(1 - progress, 3);
+                currentWheelAngle = initialAngle + spinAngle * easeOut;
+
+                drawWheel();
+                playSound('tick');
+
+                if (progress < 1) {
+                    requestAnimationFrame(animateWheel);
+                } else {
+                    isSpinning = false;
+                    document.getElementById('wheel-spin-btn').disabled = false;
+                    calculateWinner();
+                }
+            }
+
+            requestAnimationFrame(animateWheel);
+        }
+
+        function calculateWinner() {
+            const numSlices = studentRoster.length;
+            const arcSize = (2 * Math.PI) / numSlices;
+            
+            let normalizedAngle = (3 * Math.PI / 2 - currentWheelAngle) % (2 * Math.PI);
+            if (normalizedAngle < 0) normalizedAngle += 2 * Math.PI;
+
+            winningIndex = Math.floor(normalizedAngle / arcSize) % numSlices;
+            const winner = studentRoster[winningIndex];
+
+            currentPlayer = winner;
+            document.getElementById('current-player-display').innerText = currentPlayer;
+            document.getElementById('winner-name-display').innerText = `Selected: ${winner}!`;
+            document.getElementById('start-activity-btn').classList.remove('hidden');
+
+            playSound('win');
+            if (typeof confetti === 'function') {
+                confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
+            }
+        }
+
+        function removeStudent(index) {
+            if (studentRoster.length <= 1) {
+                alert("Need at least 1 student for the wheel.");
+                return;
+            }
+            studentRoster.splice(index, 1);
+            renderRosterPills();
+            drawWheel();
+        }
+
+        function resetDefaultRoster() {
+            studentRoster = ['Marco', 'Pedro', 'Ana', 'Luis', 'Sofia', 'Juan', 'Maria'];
+            renderRosterPills();
+            drawWheel();
+        }
+
+        // Classification Activity Logic
+        function resetActivity1() {
+            selectedTouchItemId = null;
+            currentItems = JSON.parse(JSON.stringify(HARDWARE_ITEMS));
+            
+            document.querySelectorAll('.drop-contents').forEach(el => el.innerHTML = '');
+            
+            renderDrawerItems();
+        }
+
+        function renderDrawerItems() {
+            const drawerLeft = document.getElementById('drawer-left');
+            const drawerRight = document.getElementById('drawer-right');
+            
+            drawerLeft.innerHTML = '';
+            drawerRight.innerHTML = '';
+
+            const unplacedItems = currentItems.filter(item => !item.placed);
+
+            if (unplacedItems.length === 0) {
+                drawerLeft.innerHTML = `<div class="col-span-2 py-4 text-center text-emerald-400 font-bold text-xs">All Items Placed!</div>`;
+                drawerRight.innerHTML = `<div class="col-span-2 py-4 text-center text-emerald-400 font-bold text-xs">Great Job!</div>`;
+                return;
+            }
+
+            unplacedItems.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.id = `item-${item.id}`;
+                card.draggable = true;
+                card.className = `item-card w-16 h-16 bg-slate-900 border-2 border-slate-700 hover:border-blue-400 rounded-2xl cursor-grab flex items-center justify-center p-1 transition btn-bounce shadow-md ${selectedTouchItemId === item.id ? 'selected-touch' : ''}`;
+                
+                card.innerHTML = `
+                    <div class="w-full h-full rounded-xl overflow-hidden bg-slate-800 flex items-center justify-center">
+                        <img src="${item.img}" alt="${item.name}" class="w-full h-full object-cover">
+                    </div>
+                `;
+
+                card.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', item.id);
+                    card.classList.add('opacity-50');
+                });
+
+                card.addEventListener('dragend', () => {
+                    card.classList.remove('opacity-50');
+                });
+
+                card.addEventListener('click', () => {
+                    if (selectedTouchItemId === item.id) {
+                        selectedTouchItemId = null;
+                    } else {
+                        selectedTouchItemId = item.id;
+                    }
+                    renderDrawerItems();
+                });
+
+                if (index % 2 === 0) {
+                    drawerLeft.appendChild(card);
+                } else {
+                    drawerRight.appendChild(card);
+                }
+            });
+        }
+
+        document.querySelectorAll('.drop-zone').forEach(zone => {
+            const category = zone.getAttribute('data-category');
+
+            zone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                zone.classList.add('drag-over');
+            });
+
+            zone.addEventListener('dragleave', () => {
+                zone.classList.remove('drag-over');
+            });
+
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zone.classList.remove('drag-over');
+                const itemId = e.dataTransfer.getData('text/plain');
+                handleItemDrop(itemId, category);
+            });
+
+            zone.addEventListener('click', () => {
+                if (selectedTouchItemId) {
+                    handleItemDrop(selectedTouchItemId, category);
+                    selectedTouchItemId = null;
+                }
+            });
+        });
+
+        function handleItemDrop(itemId, targetCategory) {
+            const item = HARDWARE_ITEMS.find(i => i.id === itemId);
+            if (!item) return;
+
+            const isCorrect = item.category === targetCategory;
+
+            if (isCorrect) {
+                const currentItemRef = currentItems.find(i => i.id === itemId);
+                if (currentItemRef) currentItemRef.placed = true;
+
+                const targetZoneBox = document.querySelector(`[data-category="${targetCategory}"] .drop-contents`);
+                const badge = document.createElement('div');
+                badge.className = 'w-12 h-12 bg-slate-800 border border-slate-700 rounded-xl overflow-hidden flex items-center justify-center shadow-sm';
+                badge.innerHTML = `
+                    <img src="${item.img}" alt="${item.name}" class="w-full h-full object-cover">
+                `;
+                targetZoneBox.appendChild(badge);
+
+                playSound('correct');
+                
+                // Remove student from roster if answered correctly
+                if (winningIndex >= 0 && winningIndex < studentRoster.length) {
+                    studentRoster.splice(winningIndex, 1);
+                    renderRosterPills();
+                }
+
+                showFeedback(true, item);
+            } else {
+                playSound('wrong');
+                showFeedback(false, item, targetCategory);
+            }
+
+            renderDrawerItems();
+        }
+
+        function clearFeedbackTimers() {
+            if (feedbackTimer) clearTimeout(feedbackTimer);
+            if (countdownInterval) clearInterval(countdownInterval);
+        }
+
+        function showFeedback(isCorrect, item, attemptedCategory) {
+            clearFeedbackTimers();
+
+            const modal = document.getElementById('modal-feedback');
+            const iconContainer = document.getElementById('feedback-icon-container');
+            const icon = document.getElementById('feedback-icon');
+            const title = document.getElementById('feedback-title');
+            const subtitle = document.getElementById('feedback-subtitle');
+            const studentBanner = document.getElementById('feedback-student-banner');
+            const studentNameSpan = document.getElementById('feedback-student-name');
+            const itemImg = document.getElementById('feedback-item-img');
+            const explanation = document.getElementById('feedback-explanation');
+            const autoReturnContainer = document.getElementById('auto-return-container');
+            const autoReturnText = document.getElementById('auto-return-text');
+
+            if (isCorrect) {
+                iconContainer.className = "w-20 h-20 rounded-full flex items-center justify-center text-4xl mb-4 border-4 shadow-lg bg-emerald-500/20 border-emerald-500 text-emerald-400";
+                icon.className = "fa-solid fa-check";
+                title.innerText = "Correct!";
+                title.className = "text-2xl font-black text-emerald-400 mb-1";
+                subtitle.innerText = `${item.name} is an ${item.category} Device`;
+                subtitle.className = "text-sm font-semibold text-emerald-300 mb-2";
+                
+                // Show student name on correct answer
+                studentBanner.classList.remove('hidden');
+                studentNameSpan.innerText = currentPlayer;
+
+                autoReturnContainer.classList.remove('hidden');
+                
+                let secondsLeft = 3;
+                autoReturnText.innerText = `Returning to Wheel in ${secondsLeft} seconds...`;
+
+                countdownInterval = setInterval(() => {
+                    secondsLeft--;
+                    if (secondsLeft > 0) {
+                        autoReturnText.innerText = `Returning to Wheel in ${secondsLeft} seconds...`;
+                    } else {
+                        clearInterval(countdownInterval);
+                    }
+                }, 1000);
+
+                feedbackTimer = setTimeout(() => {
+                    manualCloseFeedbackModal();
+                }, 3500);
+
+            } else {
+                iconContainer.className = "w-20 h-20 rounded-full flex items-center justify-center text-4xl mb-4 border-4 shadow-lg bg-red-500/20 border-red-500 text-red-400";
+                icon.className = "fa-solid fa-xmark";
+                title.innerText = "Try Again!";
+                title.className = "text-2xl font-black text-red-400 mb-1";
+                subtitle.innerText = `${item.name} is not a ${attemptedCategory} Device`;
+                subtitle.className = "text-sm font-semibold text-red-300 mb-4";
+                
+                // Hide student name banner for wrong answers since student remains on wheel
+                studentBanner.classList.add('hidden');
+                autoReturnContainer.classList.add('hidden');
+            }
+
+            itemImg.src = item.img;
+            explanation.innerText = item.desc;
+
+            modal.classList.remove('hidden');
+        }
+
+        function manualCloseFeedbackModal() {
+            clearFeedbackTimers();
+            document.getElementById('modal-feedback').classList.add('hidden');
+            goToSpin();
+        }
+
+        window.onload = function() {
+            renderRosterPills();
+            drawWheel();
+        };
+    </script>
+</body>
+</html>
