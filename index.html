@@ -279,13 +279,13 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
                 <!-- LEFT SIDE DRAWER (Picture Boxes Only) -->
-                <div class="lg:col-span-3 bg-slate-800/90 border-2 border-slate-700 rounded-3xl p-3.5 shadow-2xl">
-                    <div class="flex items-center justify-between mb-2.5 border-b border-slate-700 pb-2">
-                        <h3 class="font-black text-slate-200 text-xs md:text-sm flex items-center gap-2">
+                <div class="lg:col-span-3 bg-slate-800/90 border-2 border-slate-700 rounded-3xl p-4 shadow-2xl">
+                    <div class="flex items-center justify-between mb-3 border-b border-slate-700 pb-2">
+                        <h3 class="font-black text-slate-200 text-sm md:text-base flex items-center gap-2">
                             <i class="fa-solid fa-boxes-stacked text-amber-400"></i> Hardware (Left)
                         </h3>
                     </div>
-                    <div id="drawer-left" class="grid grid-cols-2 gap-2.5 min-h-[300px] max-h-[500px] overflow-y-auto p-1 justify-items-center">
+                    <div id="drawer-left" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-3.5 min-h-[300px] max-h-[600px] overflow-y-auto p-1 justify-items-center">
                     </div>
                 </div>
 
@@ -337,13 +337,13 @@
                 </div>
 
                 <!-- RIGHT SIDE DRAWER (Picture Boxes Only) -->
-                <div class="lg:col-span-3 bg-slate-800/90 border-2 border-slate-700 rounded-3xl p-3.5 shadow-2xl">
-                    <div class="flex items-center justify-between mb-2.5 border-b border-slate-700 pb-2">
-                        <h3 class="font-black text-slate-200 text-xs md:text-sm flex items-center gap-2">
+                <div class="lg:col-span-3 bg-slate-800/90 border-2 border-slate-700 rounded-3xl p-4 shadow-2xl">
+                    <div class="flex items-center justify-between mb-3 border-b border-slate-700 pb-2">
+                        <h3 class="font-black text-slate-200 text-sm md:text-base flex items-center gap-2">
                             <i class="fa-solid fa-boxes-stacked text-amber-400"></i> Hardware (Right)
                         </h3>
                     </div>
-                    <div id="drawer-right" class="grid grid-cols-2 gap-2.5 min-h-[300px] max-h-[500px] overflow-y-auto p-1 justify-items-center">
+                    <div id="drawer-right" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-3.5 min-h-[300px] max-h-[600px] overflow-y-auto p-1 justify-items-center">
                     </div>
                 </div>
             </div>
@@ -686,8 +686,8 @@
             const unplacedItems = currentItems.filter(item => !item.placed);
 
             if (unplacedItems.length === 0) {
-                drawerLeft.innerHTML = `<div class="col-span-2 py-4 text-center text-emerald-400 font-bold text-xs">All Items Placed!</div>`;
-                drawerRight.innerHTML = `<div class="col-span-2 py-4 text-center text-emerald-400 font-bold text-xs">Great Job!</div>`;
+                drawerLeft.innerHTML = `<div class="col-span-full py-4 text-center text-emerald-400 font-bold text-sm">All Items Placed!</div>`;
+                drawerRight.innerHTML = `<div class="col-span-full py-4 text-center text-emerald-400 font-bold text-sm">Great Job!</div>`;
                 return;
             }
 
@@ -695,12 +695,12 @@
                 const card = document.createElement('div');
                 card.id = `item-${item.id}`;
                 card.draggable = true;
-                // Made the image boxes significantly larger (w-24 h-24 to w-28 h-28 on larger screens) for high visibility
-                card.className = `item-card w-24 h-24 md:w-28 md:h-28 bg-slate-900 border-2 border-slate-700 hover:border-blue-400 rounded-2xl cursor-grab flex items-center justify-center p-1.5 transition btn-bounce shadow-lg ${selectedTouchItemId === item.id ? 'selected-touch' : ''}`;
+                // Significantly enlarged drawer cards to fill column width and maximize image size
+                card.className = `item-card w-full max-w-[180px] h-36 md:h-44 bg-slate-900 border-2 border-slate-700 hover:border-blue-400 rounded-2xl cursor-grab flex items-center justify-center p-2.5 transition btn-bounce shadow-xl ${selectedTouchItemId === item.id ? 'selected-touch' : ''}`;
                 
                 card.innerHTML = `
-                    <div class="w-full h-full rounded-xl overflow-hidden bg-slate-800/80 flex items-center justify-center p-1">
-                        <img src="${item.img}" alt="${item.name}" class="w-full h-full object-contain filter drop-shadow">
+                    <div class="w-full h-full rounded-xl overflow-hidden bg-slate-800/90 flex items-center justify-center p-2">
+                        <img src="${item.img}" alt="${item.name}" class="w-full h-full object-contain filter drop-shadow-lg">
                     </div>
                 `;
 
@@ -769,8 +769,8 @@
 
                 const targetZoneBox = document.querySelector(`[data-category="${targetCategory}"] .drop-contents`);
                 const badge = document.createElement('div');
-                // Enlarge placed item badges inside categories for better visibility
-                badge.className = 'w-16 h-16 md:w-20 md:h-20 bg-slate-800 border-2 border-slate-700 rounded-xl overflow-hidden flex items-center justify-center p-1 shadow-md';
+                // Enlarge placed item badges inside categories for better classroom visibility
+                badge.className = 'w-20 h-20 md:w-24 md:h-24 bg-slate-800 border-2 border-slate-700 rounded-xl overflow-hidden flex items-center justify-center p-1.5 shadow-md';
                 badge.innerHTML = `
                     <img src="${item.img}" alt="${item.name}" class="w-full h-full object-contain filter drop-shadow">
                 `;
