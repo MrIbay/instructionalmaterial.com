@@ -50,15 +50,23 @@
             transform: scale(0.96);
         }
 
-        /* ATTRACTIVE HOME SCREEN HERO CARD */
+        /* CENTERED HOME SCREEN */
+        #screen-home {
+            min-height: 80vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
         .hero-card {
             background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
             border: 2px solid #334155;
             border-radius: 20px;
             max-width: 550px;
-            margin: 40px auto 20px auto;
+            width: 90%;
             padding: 40px 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            margin: auto;
         }
 
         .btn-start {
@@ -89,25 +97,56 @@
             display: block;
         }
 
+        /* SPIN THE WHEEL SPLIT LAYOUT (LEFT/RIGHT) */
+        .spin-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            max-width: 950px;
+            margin: 20px auto;
+            flex-wrap: wrap;
+        }
+
+        .spin-left {
+            flex: 1;
+            min-width: 280px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .spin-right {
+            flex: 1;
+            min-width: 280px;
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            border: 2px solid #334155;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
         /* CANVAS WHEEL */
         #wheel-canvas {
             border: 6px solid #f59e0b;
             border-radius: 50%;
             background-color: white;
-            max-width: 90vw;
-            max-height: 90vw;
+            max-width: 85vw;
+            max-height: 85vw;
             box-shadow: 0 0 25px rgba(245, 158, 11, 0.3);
         }
 
         .roster-box {
-            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            background: #0f172a;
             border: 1px solid #334155;
             padding: 15px;
-            margin: 20px auto;
-            max-width: 90%;
-            width: 420px;
+            margin-top: 15px;
+            width: 100%;
             border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
         /* RESPONSIVE LAB LAYOUT */
@@ -149,7 +188,6 @@
             gap: 12px;
         }
 
-        /* MEDIA QUERY FOR SMALL MOBILE SCREENS */
         @media (max-width: 768px) {
             .lab-container {
                 flex-direction: column;
@@ -172,6 +210,12 @@
             min-height: 160px;
             cursor: pointer;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: background 0.2s;
+        }
+
+        .drop-zone.drag-over {
+            background: rgba(245, 158, 11, 0.15);
+            border-style: solid;
         }
 
         .zone-input { border-color: #10b981; }
@@ -186,18 +230,24 @@
             border: 2px solid #334155;
             background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
             margin: 5px;
-            cursor: pointer;
+            cursor: grab;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 10px;
             box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+            user-select: none;
+        }
+
+        .picture-box:active {
+            cursor: grabbing;
         }
 
         .picture-box img {
             max-width: 80px;
             max-height: 80px;
             object-fit: contain;
+            pointer-events: none;
         }
 
         .picture-box.selected {
@@ -238,7 +288,7 @@
         <div>Student: <span id="player-name" style="color:#f59e0b; font-weight:bold;">None</span></div>
     </header>
 
-    <!-- 1. HOME SCREEN -->
+    <!-- 1. HOME SCREEN (CENTERED) -->
     <div id="screen-home" class="screen active">
         <div class="hero-card">
             <h1 style="font-size: 38px; color: #f59e0b; margin: 0 0 10px 0; text-shadow: 0 3px 6px rgba(0,0,0,0.6);">
@@ -251,28 +301,39 @@
         </div>
     </div>
 
-    <!-- 2. SPIN THE WHEEL -->
+    <!-- 2. SPIN THE WHEEL (LEFT & RIGHT LAYOUT) -->
     <div id="screen-spin" class="screen">
-        <h2 style="color:#f59e0b; text-shadow:0 2px 4px rgba(0,0,0,0.4);">Spin the Wheel</h2>
-        <div style="font-size:32px; color:#ef4444; margin-bottom:-10px;">▼</div>
-        <canvas id="wheel-canvas" width="260" height="260"></canvas>
-        <br><br>
-        <button id="spin-btn" class="btn" onclick="spinWheel()" style="background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%); color:black; font-size:18px; padding:12px 30px;">SPIN WHEEL</button>
+        <h2 style="color:#f59e0b; text-shadow:0 2px 4px rgba(0,0,0,0.4); margin-bottom: 10px;">Spin the Wheel</h2>
         
-        <h3 id="winner-text" style="color:#10b981; margin-top:15px;">Press Spin to pick a student!</h3>
-        <button id="proceed-btn" class="btn" onclick="startLab()" style="display:none; background: linear-gradient(180deg, #10b981 0%, #047857 100%); font-size:16px;">Proceed to Activity</button>
+        <div class="spin-container">
+            <!-- LEFT SIDE: WHEEL -->
+            <div class="spin-left">
+                <div style="font-size:32px; color:#ef4444; margin-bottom:-10px;">▼</div>
+                <canvas id="wheel-canvas" width="260" height="260"></canvas>
+                <br>
+                <button id="spin-btn" class="btn" onclick="spinWheel()" style="background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%); color:black; font-size:18px; padding:12px 35px;">SPIN WHEEL</button>
+            </div>
 
-        <div class="roster-box">
-            <p style="margin:5px 0 10px 0; color:#94a3b8; font-size:14px;">Student Roster (comma separated):</p>
-            <input type="text" id="roster-input" value="Marco, Pedro, Ana, Luis, Sofia" style="width:70%; padding:8px; border-radius:6px; border:1px solid #475569; background:#0f172a; color:white;">
-            <button class="btn" onclick="updateRoster()" style="padding:8px 15px;">Set</button>
+            <!-- RIGHT SIDE: CHOSEN STUDENT & ROSTER -->
+            <div class="spin-right">
+                <h3 style="color:#94a3b8; margin-top:0;">Selected Student</h3>
+                <h2 id="winner-text" style="color:#10b981; margin: 10px 0 20px 0; font-size: 24px;">Press Spin to pick a student!</h2>
+                
+                <button id="proceed-btn" class="btn" onclick="startLab()" style="display:none; background: linear-gradient(180deg, #10b981 0%, #047857 100%); font-size:16px; padding: 12px 25px; margin-bottom: 20px;">Proceed to Activity</button>
+
+                <div class="roster-box">
+                    <p style="margin:0 0 10px 0; color:#94a3b8; font-size:14px;">Student Roster (comma separated):</p>
+                    <input type="text" id="roster-input" value="Marco, Pedro, Ana, Luis, Sofia" style="width:100%; padding:8px; border-radius:6px; border:1px solid #475569; background:#1e293b; color:white; margin-bottom:10px;">
+                    <button class="btn" onclick="updateRoster()" style="padding:8px 20px; width:100%;">Update Roster</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- 3. CLASSIFICATION LAB -->
     <div id="screen-lab" class="screen">
         <h2 style="color:#f59e0b; margin-bottom:5px;">Hardware Classification Lab</h2>
-        <p style="color:#94a3b8; margin-top:0;">Click a picture box, then click the matching Category Box!</p>
+        <p style="color:#94a3b8; margin-top:0;">Drag or click a picture box into the matching Category Box!</p>
 
         <div class="lab-container">
             <!-- LEFT DRAWER -->
@@ -283,19 +344,19 @@
 
             <!-- CENTER CATEGORIES -->
             <div class="center-zones">
-                <div class="drop-zone zone-input" onclick="selectZone('Input')">
+                <div class="drop-zone zone-input" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="handleDrop(event, 'Input')" onclick="selectZone('Input')">
                     <h4 style="color:#10b981; margin:5px 0;">Input Devices</h4>
                     <div id="zone-Input" style="display:flex; flex-wrap:wrap; justify-content:center;"></div>
                 </div>
-                <div class="drop-zone zone-output" onclick="selectZone('Output')">
+                <div class="drop-zone zone-output" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="handleDrop(event, 'Output')" onclick="selectZone('Output')">
                     <h4 style="color:#06b6d4; margin:5px 0;">Output Devices</h4>
                     <div id="zone-Output" style="display:flex; flex-wrap:wrap; justify-content:center;"></div>
                 </div>
-                <div class="drop-zone zone-storage" onclick="selectZone('Storage')">
+                <div class="drop-zone zone-storage" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="handleDrop(event, 'Storage')" onclick="selectZone('Storage')">
                     <h4 style="color:#f59e0b; margin:5px 0;">Storage Devices</h4>
                     <div id="zone-Storage" style="display:flex; flex-wrap:wrap; justify-content:center;"></div>
                 </div>
-                <div class="drop-zone zone-processing" onclick="selectZone('Processing')">
+                <div class="drop-zone zone-processing" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="handleDrop(event, 'Processing')" onclick="selectZone('Processing')">
                     <h4 style="color:#a855f7; margin:5px 0;">Processing Devices</h4>
                     <div id="zone-Processing" style="display:flex; flex-wrap:wrap; justify-content:center;"></div>
                 </div>
@@ -349,11 +410,11 @@
             document.getElementById('screen-spin').style.display = 'none';
             document.getElementById('screen-lab').style.display = 'none';
             
-            document.getElementById(screenId).style.display = 'block';
-            
             if (screenId === 'screen-home') {
+                document.getElementById('screen-home').style.display = 'flex';
                 document.getElementById('navbar').style.display = 'none';
             } else {
+                document.getElementById(screenId).style.display = 'block';
                 document.getElementById('navbar').style.display = 'flex';
             }
 
@@ -408,10 +469,10 @@
             document.getElementById('proceed-btn').style.display = "none";
             document.getElementById('winner-text').innerText = "Spinning...";
 
-            var speed = 0.3 + Math.random() * 0.2; // Initial speed
+            var speed = 0.3 + Math.random() * 0.2;
 
             function animate() {
-                speed = speed * 0.985; // Slow down gradually
+                speed = speed * 0.985;
                 currentAngle = currentAngle + speed;
                 drawWheel();
 
@@ -436,7 +497,7 @@
             selectedStudent = roster[winnerIndex];
 
             document.getElementById('player-name').innerText = selectedStudent;
-            document.getElementById('winner-text').innerText = "Selected Student: " + selectedStudent;
+            document.getElementById('winner-text').innerText = selectedStudent;
             document.getElementById('proceed-btn').style.display = "inline-block";
         }
 
@@ -463,9 +524,15 @@
                 var item = unplaced[i];
                 var box = document.createElement('div');
                 box.className = "picture-box" + (selectedPictureId === item.id ? " selected" : "");
+                box.draggable = true;
                 box.innerHTML = '<img src="' + item.img + '">';
                 
                 (function(id) {
+                    box.ondragstart = function(e) {
+                        e.dataTransfer.setData("text/plain", id);
+                        selectedPictureId = id;
+                    };
+
                     box.onclick = function() {
                         if (selectedPictureId === id) {
                             selectedPictureId = null;
@@ -482,6 +549,26 @@
                     rightBox.appendChild(box);
                 }
             }
+        }
+
+        // DRAG AND DROP HANDLERS
+        function allowDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function leaveDrop(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(e, categoryName) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            var id = e.dataTransfer.getData("text/plain");
+            if (id) {
+                selectedPictureId = id;
+            }
+            selectZone(categoryName);
         }
 
         function selectZone(categoryName) {
@@ -505,11 +592,9 @@
                     }
                 }
                 
-                // Add picture inside correct category
                 var targetZone = document.getElementById('zone-' + categoryName);
                 targetZone.innerHTML += '<img src="' + item.img + '" style="width:45px; height:45px; margin:2px;">';
                 
-                // Remove student from roster if correct
                 if (winnerIndex >= 0 && winnerIndex < roster.length) {
                     roster.splice(winnerIndex, 1);
                 }
@@ -520,7 +605,6 @@
             renderDrawers();
         }
 
-        // MODAL FEEDBACK (No auto timer)
         function showModal(isCorrect, item) {
             var modal = document.getElementById('feedback-modal');
             var title = document.getElementById('modal-title');
