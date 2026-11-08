@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>PC Builder Challenge</title>
     <style>
-        * {
+        {
             box-sizing: border-box;
         }
 
@@ -19,7 +19,7 @@
             min-height: 100vh;
         }
 
-        /* NAVBAR HEADER */
+        
         header {
             background: linear-gradient(90deg, #0f172a 0%, #1e293b 100%);
             padding: 12px 20px;
@@ -222,7 +222,7 @@
         .zone-storage { border-color: #f59e0b; }
         .zone-processing { border-color: #a855f7; }
 
-        /* PICTURE BOXES */
+       
         .picture-box {
             width: 90px;
             height: 90px;
@@ -254,7 +254,7 @@
             box-shadow: 0 0 15px #f59e0b;
         }
 
-        /* POPUP MODAL */
+        
         .modal {
             display: none;
             position: fixed;
@@ -305,7 +305,7 @@
         <h2 style="color:#f59e0b; text-shadow:0 2px 4px rgba(0,0,0,0.4); margin-bottom: 10px;">Spin the Wheel</h2>
         
         <div class="spin-container">
-            <!-- LEFT SIDE: WHEEL -->
+            
             <div class="spin-left">
                 <div style="font-size:32px; color:#ef4444; margin-bottom:-10px;">▼</div>
                 <canvas id="wheel-canvas" width="260" height="260"></canvas>
@@ -313,7 +313,7 @@
                 <button id="spin-btn" class="btn" onclick="spinWheel()" style="background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%); color:black; font-size:18px; padding:12px 35px;">SPIN WHEEL</button>
             </div>
 
-            <!-- RIGHT SIDE: CHOSEN STUDENT & ROSTER -->
+            
             <div class="spin-right">
                 <h3 style="color:#94a3b8; margin-top:0;">Selected Student</h3>
                 <h2 id="winner-text" style="color:#10b981; margin: 10px 0 20px 0; font-size: 24px;">Press Spin to pick a student!</h2>
@@ -335,7 +335,7 @@
         <p style="color:#94a3b8; margin-top:0;">Drag or click a picture box into the matching Category Box!</p>
 
         <div class="lab-container">
-            <!-- LEFT DRAWER -->
+            
             <div class="side-drawer">
                 <h3 style="color:#94a3b8; margin-top:5px;">Hardware (Left)</h3>
                 <div id="left-drawer" class="drawer-items"></div>
@@ -361,7 +361,7 @@
                 </div>
             </div>
 
-            <!-- RIGHT DRAWER -->
+            
             <div class="side-drawer">
                 <h3 style="color:#94a3b8; margin-top:5px;">Hardware (Right)</h3>
                 <div id="right-drawer" class="drawer-items"></div>
@@ -381,7 +381,7 @@
     </div>
 
     <script>
-        // HARDWARE DATA
+        
         var HARDWARE = [
             { id: 'keyboard', category: 'Input', img: 'keyboard.jfif', desc: 'Keyboard: Used to type text and commands.' },
             { id: 'mouse', category: 'Input', img: 'mouse.jpg', desc: 'Mouse: Used to point and click objects.' },
@@ -397,7 +397,7 @@
             { id: 'gpu', category: 'Processing', img: 'gpu.jfif', desc: 'GPU: Processes 3D graphics and games.' }
         ];
 
-        var roster = ["Marco", "Pedro", "Ana", "Luis", "Sofia"];
+        var roster = ["Paul", "John", "Aiki", "Ailyn", "Jose"];
         var selectedStudent = "";
         var winnerIndex = -1;
         var selectedPictureId = null;
