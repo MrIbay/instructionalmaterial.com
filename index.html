@@ -50,7 +50,6 @@
             transform: scale(0.96);
         }
 
-        /* CENTERED HOME SCREEN */
         #screen-home {
             min-height: 80vh;
             display: flex;
@@ -86,7 +85,7 @@
             background: linear-gradient(180deg, #fef08a 0%, #f59e0b 100%);
         }
 
-        /* SCREENS */
+        
         .screen {
             display: none;
             margin-top: 20px;
@@ -97,7 +96,7 @@
             display: block;
         }
 
-        /* SPIN THE WHEEL SPLIT LAYOUT (LEFT/RIGHT) */
+        
         .spin-container {
             display: flex;
             flex-direction: row;
@@ -130,7 +129,7 @@
             align-items: center;
         }
 
-        /* CANVAS WHEEL */
+        
         #wheel-canvas {
             border: 6px solid #f59e0b;
             border-radius: 50%;
@@ -149,7 +148,7 @@
             border-radius: 12px;
         }
 
-        /* RESPONSIVE LAB LAYOUT */
+        
         .lab-container {
             display: flex;
             flex-direction: row;
@@ -281,14 +280,14 @@
 </head>
 <body>
 
-    <!-- NAVBAR -->
+    
     <header id="navbar" style="display: none;">
         <button class="btn" onclick="goToScreen('screen-home')">Home</button>
         <h2 style="color:#f59e0b; margin:0; font-size:20px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">PC Builder Challenge</h2>
         <div>Student: <span id="player-name" style="color:#f59e0b; font-weight:bold;">None</span></div>
     </header>
 
-    <!-- 1. HOME SCREEN (CENTERED) -->
+    
     <div id="screen-home" class="screen active">
         <div class="hero-card">
             <h1 style="font-size: 38px; color: #f59e0b; margin: 0 0 10px 0; text-shadow: 0 3px 6px rgba(0,0,0,0.6);">
@@ -301,7 +300,7 @@
         </div>
     </div>
 
-    <!-- 2. SPIN THE WHEEL (LEFT & RIGHT LAYOUT) -->
+    
     <div id="screen-spin" class="screen">
         <h2 style="color:#f59e0b; text-shadow:0 2px 4px rgba(0,0,0,0.4); margin-bottom: 10px;">Spin the Wheel</h2>
         
@@ -330,7 +329,7 @@
         </div>
     </div>
 
-    <!-- 3. CLASSIFICATION LAB -->
+    
     <div id="screen-lab" class="screen">
         <h2 style="color:#f59e0b; margin-bottom:5px;">Hardware Classification Lab</h2>
         <p style="color:#94a3b8; margin-top:0;">Drag or click a picture box into the matching Category Box!</p>
@@ -342,7 +341,7 @@
                 <div id="left-drawer" class="drawer-items"></div>
             </div>
 
-            <!-- CENTER CATEGORIES -->
+            
             <div class="center-zones">
                 <div class="drop-zone zone-input" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="handleDrop(event, 'Input')" onclick="selectZone('Input')">
                     <h4 style="color:#10b981; margin:5px 0;">Input Devices</h4>
@@ -370,7 +369,7 @@
         </div>
     </div>
 
-    <!-- FEEDBACK POPUP -->
+    
     <div id="feedback-modal" class="modal">
         <div class="modal-content">
             <h2 id="modal-title">Result</h2>
@@ -404,7 +403,7 @@
         var selectedPictureId = null;
         var activeItems = [];
 
-        // SIMPLE SCREEN NAVIGATION
+        
         function goToScreen(screenId) {
             document.getElementById('screen-home').style.display = 'none';
             document.getElementById('screen-spin').style.display = 'none';
@@ -423,7 +422,7 @@
             }
         }
 
-        // ANIMATED WHEEL LOGIC
+        
         var canvas = document.getElementById('wheel-canvas');
         var ctx = canvas.getContext('2d');
         var currentAngle = 0;
@@ -501,7 +500,7 @@
             document.getElementById('proceed-btn').style.display = "inline-block";
         }
 
-        // ACTIVITY LAB LOGIC
+        
         function startLab() {
             activeItems = JSON.parse(JSON.stringify(HARDWARE));
             document.getElementById('zone-Input').innerHTML = "";
@@ -551,7 +550,7 @@
             }
         }
 
-        // DRAG AND DROP HANDLERS
+        
         function allowDrop(e) {
             e.preventDefault();
             e.currentTarget.classList.add('drag-over');
